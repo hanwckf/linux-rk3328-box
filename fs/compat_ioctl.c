@@ -57,6 +57,7 @@
 #include <linux/i2c-dev.h>
 #include <linux/atalk.h>
 #include <linux/gfp.h>
+#include <linux/cec.h>
 
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci_sock.h>
@@ -219,6 +220,140 @@ static int do_video_set_spu_palette(unsigned int fd, unsigned int cmd,
 		return -EFAULT;
 
 	err = sys_ioctl(fd, cmd, (unsigned long) up_native);
+
+	return err;
+}
+
+struct compat_dtv_property {
+	__u32 cmd;
+	__u32 reserved[3];
+	union {
+		__u32 data;
+		struct {
+			__u8 data[32];
+			__u32 len;
+			__u32 reserved1[3];
+			compat_uptr_t reserved2;
+		} buffer;
+	} u;
+	int result;
+};
+
+struct compat_dtv_properties {
+	__u32 num;
+	compat_uptr_t props;
+};
+
+#define FE_SET_PROPERTY32    _IOW('o', 82, struct compat_dtv_properties)
+#define FE_GET_PROPERTY32    _IOR('o', 83, struct compat_dtv_properties)
+
+static int do_fe_set_property(unsigned int fd, unsigned int cmd,
+		struct compat_dtv_properties __user *dtv32)
+{
+	struct dtv_properties __user *dtv;
+	struct dtv_property __user *properties;
+	struct compat_dtv_property __user *properties32;
+	compat_uptr_t data;
+
+	int err;
+	int i;
+	__u32 num;
+
+	err = get_user(num, &dtv32->num);
+	err |= get_user(data, &dtv32->props);
+
+	if(err)
+		return -EFAULT;
+
+	dtv = compat_alloc_user_space(sizeof(struct dtv_properties) +
+			sizeof(struct dtv_property) * num);
+	properties = (struct dtv_property*)((char*)dtv +
+			sizeof(struct dtv_properties));
+
+	err = put_user(properties, &dtv->props);
+	err |= put_user(num, &dtv->num);
+
+	properties32 = compat_ptr(data);
+
+	if(err)
+		return -EFAULT;
+
+	for(i = 0; i < num; i++) {
+		compat_uptr_t reserved2;
+
+		err |= copy_in_user(&properties[i], &properties32[i],
+				(8 * sizeof(__u32)) + (32 * sizeof(__u8)));
+		err |= get_user(reserved2, &properties32[i].u.buffer.reserved2);
+		err |= put_user(compat_ptr(reserved2),
+				&properties[i].u.buffer.reserved2);
+	}
+
+	if(err)
+		return -EFAULT;
+
+	err = sys_ioctl(fd, FE_SET_PROPERTY, (unsigned long) dtv);
+
+	for(i = 0; i < num; i++) {
+		if(copy_in_user(&properties32[i].result, &properties[i].result,
+					sizeof(int)))
+			return -EFAULT;
+	}
+
+	return err;
+}
+
+static int do_fe_get_property(unsigned int fd, unsigned int cmd,
+		struct compat_dtv_properties __user *dtv32)
+{
+	struct dtv_properties __user *dtv;
+	struct dtv_property __user *properties;
+	struct compat_dtv_property __user *properties32;
+	compat_uptr_t data;
+
+	int err;
+	int i;
+	__u32 num;
+
+	err = get_user(num, &dtv32->num);
+	err |= get_user(data, &dtv32->props);
+
+	if(err)
+		return -EFAULT;
+
+	dtv = compat_alloc_user_space(sizeof(struct dtv_properties) +
+			sizeof(struct dtv_property) * num);
+	properties = (struct dtv_property*)((char*)dtv +
+			sizeof(struct dtv_properties));
+
+	err = put_user(properties, &dtv->props);
+	err |= put_user(num, &dtv->num);
+
+	properties32 = compat_ptr(data);
+
+	if(err)
+		return -EFAULT;
+
+	for(i = 0; i < num; i++) {
+		compat_uptr_t reserved2;
+
+		err |= copy_in_user(&properties[i], &properties32[i],
+				(8 * sizeof(__u32)) + (32 * sizeof(__u8)));
+		err |= get_user(reserved2, &properties32[i].u.buffer.reserved2);
+		err |= put_user(compat_ptr(reserved2),
+				&properties[i].u.buffer.reserved2);
+	}
+
+	if(err)
+		return -EFAULT;
+
+	err = sys_ioctl(fd, FE_GET_PROPERTY, (unsigned long) dtv);
+
+	for(i = 0; i < num; i++) {
+
+		if(copy_in_user(&properties32[i], &properties[i],
+					sizeof(properties32[i])))
+			return -EFAULT;
+	}
 
 	return err;
 }
@@ -1381,6 +1516,17 @@ COMPATIBLE_IOCTL(VIDEO_GET_NAVI)
 COMPATIBLE_IOCTL(VIDEO_SET_ATTRIBUTES)
 COMPATIBLE_IOCTL(VIDEO_GET_SIZE)
 COMPATIBLE_IOCTL(VIDEO_GET_FRAME_RATE)
+/* cec */
+COMPATIBLE_IOCTL(CEC_ADAP_G_CAPS)
+COMPATIBLE_IOCTL(CEC_ADAP_G_LOG_ADDRS)
+COMPATIBLE_IOCTL(CEC_ADAP_S_LOG_ADDRS)
+COMPATIBLE_IOCTL(CEC_ADAP_G_PHYS_ADDR)
+COMPATIBLE_IOCTL(CEC_ADAP_S_PHYS_ADDR)
+COMPATIBLE_IOCTL(CEC_G_MODE)
+COMPATIBLE_IOCTL(CEC_S_MODE)
+COMPATIBLE_IOCTL(CEC_TRANSMIT)
+COMPATIBLE_IOCTL(CEC_RECEIVE)
+COMPATIBLE_IOCTL(CEC_DQEVENT)
 
 /* joystick */
 COMPATIBLE_IOCTL(JSIOCGVERSION)
@@ -1483,6 +1629,10 @@ static long do_ioctl_trans(int fd, unsigned int cmd,
 		return do_video_stillpicture(fd, cmd, argp);
 	case VIDEO_SET_SPU_PALETTE:
 		return do_video_set_spu_palette(fd, cmd, argp);
+	case FE_SET_PROPERTY32:
+		return do_fe_set_property(fd, cmd, argp);
+	case FE_GET_PROPERTY32:
+		return do_fe_get_property(fd, cmd, argp);
 	}
 
 	/*

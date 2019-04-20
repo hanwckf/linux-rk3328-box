@@ -178,6 +178,7 @@ struct vop_ctrl {
 	struct vop_reg dsp_lut_en;
 
 	struct vop_reg out_mode;
+	struct vop_reg yuv_clip;
 
 	struct vop_reg xmirror;
 	struct vop_reg ymirror;
@@ -409,6 +410,7 @@ struct vop_win_phy {
 	struct vop_reg format;
 	struct vop_reg fmt_10;
 	struct vop_reg csc_mode;
+	struct vop_reg yuv_clip;
 	struct vop_reg xmirror;
 	struct vop_reg ymirror;
 	struct vop_reg rb_swap;

@@ -43,10 +43,21 @@
 /dts-v1/;
 #include <dt-bindings/pwm/pwm.h>
 #include "rk3288.dtsi"
-#include "rk3288-linux.dtsi"
+#include "rk3288cg-opp.dtsi"
 
 / {
+	model = "mqmaker MiQi";
 	compatible = "rockchip,rk3288-miqi", "rockchip,rk3288";
+
+	chosen {
+		bootargs = "earlyprintk=uart8250-32bit,0xff690000";
+	};
+
+	cpuinfo {
+		compatible = "rockchip,cpuinfo";
+		nvmem-cells = <&efuse_id>;
+		nvmem-cell-names = "id";
+	};
 
 	memory {
 		device_type = "memory";
@@ -56,29 +67,14 @@
 	sound {
 		compatible = "simple-audio-card";
 		simple-audio-card,format = "i2s";
-		simple-audio-card,name = "DW-HDMI";
+		simple-audio-card,name = "HDMI";
 		simple-audio-card,mclk-fs = <512>;
-
-		simple-audio-card,dai-link@0 {  /* I2S - S/PDIF */
-			format = "i2s";
-			cpu {
-				sound-dai = <&i2s>;
-			};
-			codec {
-				sound-dai = <&hdmi>;
-			};
+		simple-audio-card,cpu {
+			sound-dai = <&i2s>;
 		};
-
-		/*
-		 * If you want to support more cards,
-		 * you can add more dai-link node,
-		 * such as
-		 *
-		 *   simple-audio-card,dai-link@1 {
-		 *       ......
-		 *   }
-		 */
-
+		simple-audio-card,codec {
+			sound-dai = <&hdmi>;
+		};
 	};
 
 	ext_gmac: external-gmac-clock {
@@ -204,6 +200,12 @@
 	#size-cells = <0>;
 	#sound-dai-cells = <0>;
 	status = "okay";
+	/* Don't use vopl for HDMI */
+	ports {
+		hdmi_in: port {
+			/delete-node/ endpoint@1;
+		};
+	};
 };
 
 &hevc_service {
@@ -235,14 +237,14 @@
 	clock_in_out = "input";
 	snps,reset-gpio = <&gpio4 7 0>;
 	snps,reset-active-low;
-	snps,reset-delays-us = <0 10000 1000000>;
+	snps,reset-delays-us = <0 10000 50000>;
 	assigned-clocks = <&cru SCLK_MAC>;
 	assigned-clock-parents = <&ext_gmac>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&rgmii_pins>;
 	tx_delay = <0x30>;
 	rx_delay = <0x10>;
-	status = "ok";
+	status = "okay";
 };
 
 /* ----------------------------------------------------------------------------------
@@ -414,6 +416,15 @@ I2C
 
 &i2s {
 	#sound-dai-cells = <0>;
+	rockchip,bclk-fs = <128>;
+	status = "okay";
+};
+
+&iep {
+	status = "okay";
+};
+
+&iep_mmu {
 	status = "okay";
 };
 
@@ -436,6 +447,17 @@ I2C
 };
 
 &rga {
+	status = "okay";
+};
+
+&saradc {
+	vref-supply = <&vcc_18>;
+	status = "okay";
+};
+
+&tsadc {
+	rockchip,hw-tshut-mode = <0>;
+	rockchip,hw-tshut-polarity = <0>;
 	status = "okay";
 };
 
@@ -472,6 +494,10 @@ I2C
 
 &vopl {
 	status = "okay";
+	/* Don't use vopl for HDMI */
+	vopl_out: port {
+		/delete-node/ endpoint@0;
+	};
 };
 
 &vopl_mmu {
@@ -546,4 +572,3 @@ I2C
 	};
 
 };
-

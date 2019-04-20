@@ -1429,7 +1429,7 @@ static void vop_crtc_disable(struct drm_crtc *crtc)
 		vop->is_iommu_enabled = false;
 	}
 
-	pm_runtime_put(vop->dev);
+	pm_runtime_put_sync(vop->dev);
 	clk_disable_unprepare(vop->dclk);
 	clk_disable_unprepare(vop->aclk);
 	clk_disable_unprepare(vop->hclk);
@@ -1653,6 +1653,7 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
 	int ymirror, xmirror;
 	uint32_t val;
 	bool rb_swap, global_alpha_en;
+	int skip_lines = 0;
 
 #if defined(CONFIG_ROCKCHIP_DRM_DEBUG)
 	bool AFBC_flag = false;
@@ -1689,8 +1690,14 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
 	}
 
 	mode = &crtc->state->adjusted_mode;
+
+	/*
+	 * force skip lines if image too big.
+	 */
 	actual_w = drm_rect_width(src) >> 16;
-	actual_h = drm_rect_height(src) >> 16;
+	if (actual_w == 3840 && is_yuv_support(fb->pixel_format))
+		skip_lines = 1;
+	actual_h = drm_rect_height(src) >> (16 + skip_lines);
 	act_info = (actual_h - 1) << 16 | ((actual_w - 1) & 0xffff);
 
 	dsp_info = (drm_rect_height(dest) - 1) << 16;
@@ -1724,15 +1731,16 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
 	s = to_rockchip_crtc_state(crtc->state);
 
 	spin_lock(&vop->reg_lock);
+	VOP_WIN_SET(vop, win, yuv_clip, 0);
 	VOP_WIN_SET(vop, win, xmirror, xmirror);
 	VOP_WIN_SET(vop, win, ymirror, ymirror);
 	VOP_WIN_SET(vop, win, format, vop_plane_state->format);
-	VOP_WIN_SET(vop, win, yrgb_vir, fb->pitches[0] >> 2);
+	VOP_WIN_SET(vop, win, yrgb_vir, fb->pitches[0] >> (2 - skip_lines));
 	VOP_WIN_SET(vop, win, yrgb_mst, vop_plane_state->yrgb_mst);
 	VOP_WIN_SET(vop, win, yrgb_mst1, vop_plane_state->yrgb_mst);
 
 	if (is_yuv_support(fb->pixel_format)) {
-		VOP_WIN_SET(vop, win, uv_vir, fb->pitches[1] >> 2);
+		VOP_WIN_SET(vop, win, uv_vir, fb->pitches[1] >> (2 - skip_lines));
 		VOP_WIN_SET(vop, win, uv_mst, vop_plane_state->uv_mst);
 	}
 	VOP_WIN_SET(vop, win, fmt_10, is_yuv_10bit(fb->pixel_format));
@@ -2537,6 +2545,7 @@ static void vop_update_csc(struct drm_crtc *crtc)
 		VOP_CTRL_SET(vop, dsp_data_swap, 0);
 
 	VOP_CTRL_SET(vop, out_mode, s->output_mode);
+	VOP_CTRL_SET(vop, yuv_clip, 0);
 
 	switch (s->bus_format) {
 	case MEDIA_BUS_FMT_RGB565_1X16:

@@ -119,6 +119,7 @@ static const struct vop_win_phy rk3288_win01_data = {
 	.fmt_10 = VOP_REG(RK3288_WIN0_CTRL0, 0x7, 4),
 	.csc_mode = VOP_REG_VER(RK3288_WIN0_CTRL0, 0x3, 10, 3, 2, -1),
 	.rb_swap = VOP_REG(RK3288_WIN0_CTRL0, 0x1, 12),
+	.yuv_clip = VOP_REG(RK3288_WIN0_CTRL0, 0x1, 20),
 	.xmirror = VOP_REG_VER(RK3368_WIN0_CTRL0, 0x1, 21, 3, 2, -1),
 	.ymirror = VOP_REG_VER(RK3368_WIN0_CTRL0, 0x1, 22, 3, 2, -1),
 	.act_info = VOP_REG(RK3288_WIN0_ACT_INFO, 0x1fff1fff, 0),
@@ -286,6 +287,7 @@ static const struct vop_ctrl rk3288_ctrl_data = {
 	.bcsh_color_bar = VOP_REG(RK3288_BCSH_COLOR_BAR, 0xffffff, 8),
 	.bcsh_en = VOP_REG(RK3288_BCSH_COLOR_BAR, 0x1, 0),
 
+	.yuv_clip = VOP_REG(RK3288_DSP_CTRL0, 0x1, 21),
 	.xmirror = VOP_REG(RK3288_DSP_CTRL0, 0x1, 22),
 	.ymirror = VOP_REG(RK3288_DSP_CTRL0, 0x1, 23),
 
@@ -964,6 +966,7 @@ static const struct vop_ctrl rk3328_ctrl_data = {
 	.dsp_lut_en = VOP_REG(RK3328_DSP_CTRL1, 0x1, 0),
 	.out_mode = VOP_REG(RK3328_DSP_CTRL0, 0xf, 0),
 
+	.yuv_clip = VOP_REG(RK3328_DSP_CTRL0, 0x1, 21),
 	.xmirror = VOP_REG(RK3328_DSP_CTRL0, 0x1, 22),
 	.ymirror = VOP_REG(RK3328_DSP_CTRL0, 0x1, 23),
 

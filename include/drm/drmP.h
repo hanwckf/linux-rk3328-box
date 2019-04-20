@@ -51,6 +51,7 @@
 #include <linux/platform_device.h>
 #include <linux/poll.h>
 #include <linux/ratelimit.h>
+#include <linux/rbtree.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -365,10 +366,10 @@ struct drm_pending_event {
 	void (*destroy)(struct drm_pending_event *event);
 };
 
-/* initial implementaton using a linked list - todo hashtab */
 struct drm_prime_file_private {
-	struct list_head head;
 	struct mutex lock;
+	struct rb_root dmabufs;
+	struct rb_root handles;
 };
 
 /** File private data */
@@ -1123,6 +1124,8 @@ static inline int drm_debugfs_remove_files(const struct drm_info_list *files,
 }
 #endif
 
+struct dma_buf_export_info;
+
 extern struct dma_buf *drm_gem_prime_export(struct drm_device *dev,
 					    struct drm_gem_object *obj,
 					    int flags);
@@ -1133,6 +1136,8 @@ extern struct drm_gem_object *drm_gem_prime_import(struct drm_device *dev,
 		struct dma_buf *dma_buf);
 extern int drm_gem_prime_fd_to_handle(struct drm_device *dev,
 		struct drm_file *file_priv, int prime_fd, uint32_t *handle);
+struct dma_buf *drm_gem_dmabuf_export(struct drm_device *dev,
+				      struct dma_buf_export_info *exp_info);
 extern void drm_gem_dmabuf_release(struct dma_buf *dma_buf);
 
 extern int drm_prime_sg_to_page_addr_arrays(struct sg_table *sgt, struct page **pages,

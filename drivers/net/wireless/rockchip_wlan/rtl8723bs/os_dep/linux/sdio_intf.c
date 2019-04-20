@@ -45,6 +45,14 @@ static struct mmc_host *mmc_host = NULL;
 
 static const struct sdio_device_id sdio_ids[] = {
 #ifdef CONFIG_RTL8723B
+	{ SDIO_DEVICE(0x024c, 0x0240), .driver_data = RTL8723B},
+	{ SDIO_DEVICE(0x024c, 0x0241), .driver_data = RTL8723B},
+	{ SDIO_DEVICE(0x024c, 0x0523), .driver_data = RTL8723B},
+	{ SDIO_DEVICE(0x024c, 0x0524), .driver_data = RTL8723B},
+	{ SDIO_DEVICE(0x024c, 0x0623), .driver_data = RTL8723B},
+	{ SDIO_DEVICE(0x024c, 0x0624), .driver_data = RTL8723B},
+	{ SDIO_DEVICE(0x024c, 0x0626), .driver_data = RTL8723B},
+	{ SDIO_DEVICE(0x024c, 0x8753), .driver_data = RTL8723B},
 	{ SDIO_DEVICE(0x024c, 0xB723), .driver_data = RTL8723B},
 #endif
 #ifdef CONFIG_RTL8188E

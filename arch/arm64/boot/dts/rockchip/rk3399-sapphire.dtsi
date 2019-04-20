@@ -536,6 +536,14 @@
 	status = "okay";
 };
 
+&pvtm {
+	status = "okay";
+};
+
+&pmu_pvtm {
+	status = "okay";
+};
+
 &pmu_io_domains {
 	status = "okay";
 	pmu1830-supply = <&vcc_3v0>;
@@ -563,7 +571,7 @@
 
 &sdio0 {
 	clock-frequency = <50000000>;
-	clock-freq-min-max = <200000 50000000>;
+	max-frequency = <50000000>;
 	supports-sdio;
 	bus-width = <4>;
 	disable-wp;
@@ -581,14 +589,17 @@
 
 &sdmmc {
 	clock-frequency = <150000000>;
-	clock-freq-min-max = <100000 150000000>;
+	max-frequency = <150000000>;
 	supports-sd;
 	bus-width = <4>;
 	cap-mmc-highspeed;
 	cap-sd-highspeed;
 	disable-wp;
 	num-slots = <1>;
-	//sd-uhs-sdr104;
+	sd-uhs-sdr12;
+	sd-uhs-sdr25;
+	sd-uhs-sdr50;
+	sd-uhs-sdr104;
 	vmmc-supply = <&vcc_sd>;
 	vqmmc-supply = <&vccio_sd>;
 	pinctrl-names = "default";

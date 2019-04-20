@@ -1563,15 +1563,15 @@ void drm_atomic_helper_commit_planes(struct drm_device *dev,
 	for_each_connector_in_state(old_state, connector, old_conn_state, i) {
 		const struct drm_connector_helper_funcs *funcs;
 
-		if (!connector->state->crtc)
-			continue;
-
-		if (!connector->state->crtc->state->active)
-			continue;
-
 		funcs = connector->helper_private;
 
 		if (!funcs || !funcs->atomic_begin)
+			continue;
+
+		if (!connector->state->crtc)
+			continue;
+
+		if (active_only && !connector->state->crtc->state->active)
 			continue;
 
 		DRM_DEBUG_ATOMIC("flush beginning [CONNECTOR:%d:%s]\n",
@@ -1645,15 +1645,15 @@ void drm_atomic_helper_commit_planes(struct drm_device *dev,
 	for_each_connector_in_state(old_state, connector, old_conn_state, i) {
 		const struct drm_connector_helper_funcs *funcs;
 
-		if (!connector->state->crtc)
-			continue;
-
-		if (!connector->state->crtc->state->active)
-			continue;
-
 		funcs = connector->helper_private;
 
 		if (!funcs || !funcs->atomic_flush)
+			continue;
+
+		if (!connector->state->crtc)
+			continue;
+
+		if (active_only && !connector->state->crtc->state->active)
 			continue;
 
 		DRM_DEBUG_ATOMIC("flushing [CONNECTOR:%d:%s]\n",

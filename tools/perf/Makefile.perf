@@ -33,6 +33,11 @@ include config/utilities.mak
 #
 # Define EXTRA_CFLAGS=-m64 or EXTRA_CFLAGS=-m32 as appropriate for cross-builds.
 #
+# Define EXCLUDE_EXTLIBS=-lmylib to exclude libmylib from the auto-generated
+# EXTLIBS.
+#
+# Define EXTRA_PERFLIBS to pass extra libraries to PERFLIBS.
+#
 # Define NO_DWARF if you do not want debug-info analysis feature at all.
 #
 # Define WERROR=0 to disable treating any warnings as errors.
@@ -289,7 +294,8 @@ ifdef ASCIIDOC8
   export ASCIIDOC8
 endif
 
-LIBS = -Wl,--whole-archive $(PERFLIBS) -Wl,--no-whole-archive -Wl,--start-group $(EXTLIBS) -Wl,--end-group
+EXTLIBS := $(call filter-out,$(EXCLUDE_EXTLIBS),$(EXTLIBS))
+LIBS = -Wl,--whole-archive $(PERFLIBS) $(EXTRA_PERFLIBS) -Wl,--no-whole-archive -Wl,--start-group $(EXTLIBS) -Wl,--end-group
 
 export INSTALL SHELL_PATH
 

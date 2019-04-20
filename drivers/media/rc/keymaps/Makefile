@@ -18,6 +18,7 @@ obj-$(CONFIG_RC_MAP) += rc-adstech-dvb-t-pci.o \
 			rc-behold.o \
 			rc-behold-columbus.o \
 			rc-budget-ci-old.o \
+			rc-cec.o \
 			rc-cinergy-1400.o \
 			rc-cinergy.o \
 			rc-delock-61959.o \
@@ -47,6 +48,7 @@ obj-$(CONFIG_RC_MAP) += rc-adstech-dvb-t-pci.o \
 			rc-it913x-v1.o \
 			rc-it913x-v2.o \
 			rc-kaiomy.o \
+			rc-khadas.o \
 			rc-kworld-315u.o \
 			rc-kworld-pc150u.o \
 			rc-kworld-plus-tv-analog.o \
@@ -65,7 +67,9 @@ obj-$(CONFIG_RC_MAP) += rc-adstech-dvb-t-pci.o \
 			rc-nec-terratec-cinergy-xs.o \
 			rc-norwood.o \
 			rc-npgtech.o \
+			rc-odroid.o \
 			rc-pctv-sedna.o \
+			rc-pine64.o \
 			rc-pinnacle-color.o \
 			rc-pinnacle-grey.o \
 			rc-pinnacle-pctv-hd.o \
@@ -81,6 +85,7 @@ obj-$(CONFIG_RC_MAP) += rc-adstech-dvb-t-pci.o \
 			rc-rc6-mce.o \
 			rc-real-audio-220-32-keys.o \
 			rc-reddo.o \
+			rc-roc-cc.o \
 			rc-snapstream-firefly.o \
 			rc-streamzap.o \
 			rc-tbs-nec.o \
@@ -99,6 +104,9 @@ obj-$(CONFIG_RC_MAP) += rc-adstech-dvb-t-pci.o \
 			rc-tt-1500.o \
 			rc-twinhan-dtv-cab-ci.o \
 			rc-twinhan1027.o \
+			rc-trn9.o \
+			rc-wetek-hub.o \
+			rc-wetek-play-2.o \
 			rc-videomate-m1f.o \
 			rc-videomate-s350.o \
 			rc-videomate-tv-pvr.o \

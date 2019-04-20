@@ -1630,9 +1630,6 @@ static void try_set_reg(struct vpu_subdev_data *data)
 			reg_from_wait_to_run(pservice, reg);
 			reg_copy_to_hw(reg->data, reg);
 		}
-	} else {
-		if (pservice->hw_ops->reduce_freq)
-			pservice->hw_ops->reduce_freq(pservice);
 	}
 
 	mutex_unlock(&pservice->shutdown_lock);
@@ -2385,6 +2382,7 @@ static void vcodec_set_freq_rk3328(struct vpu_service_info *pservice,
 	if (curr == reg->freq)
 		return;
 
+	atomic_set(&pservice->freq_status, reg->freq);
 	if (pservice->dev_id == VCODEC_DEVICE_ID_RKVDEC) {
 		if (reg->reg[1] & 0x00800000) {
 			if (rkv_dec_get_fmt(reg->reg) == FMT_H264D)

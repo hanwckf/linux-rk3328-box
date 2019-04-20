@@ -649,6 +649,7 @@ void rockchip_gem_free_object(struct drm_gem_object *obj)
 			dma_unmap_sg(drm->dev, rk_obj->sgt->sgl,
 				     rk_obj->sgt->nents, DMA_BIDIRECTIONAL);
 		}
+		drm_prime_gem_destroy(obj, rk_obj->sgt);
 	} else {
 		rockchip_gem_free_buf(rk_obj);
 	}

@@ -10,6 +10,7 @@
 #include <linux/list.h>
 #include <linux/atomic.h>
 #include <linux/spinlock.h>
+#include <linux/errno.h>
 
 #define IEP_IOMMU_COMPATIBLE_NAME "rockchip,iep_mmu"
 #define VIP_IOMMU_COMPATIBLE_NAME "rockchip,vip_mmu"

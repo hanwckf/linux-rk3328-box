@@ -348,8 +348,7 @@ int kbase_devfreq_init(struct kbase_device *kbdev)
 	dp = &kbdev->devfreq_profile;
 
 	dp->initial_freq = kbdev->current_freq;
-	/* .KP : set devfreq_dvfs_interval_in_ms */
-	dp->polling_ms = 20;
+	dp->polling_ms = 100;
 	dp->target = kbase_devfreq_target;
 	dp->get_dev_status = kbase_devfreq_status;
 	dp->get_cur_freq = kbase_devfreq_cur_freq;
@@ -363,7 +362,7 @@ int kbase_devfreq_init(struct kbase_device *kbdev)
 		return err;
 
 	kbdev->devfreq = devfreq_add_device(kbdev->dev, dp,
-				"simple_ondemand", NULL);
+				"performance", NULL);
 	if (IS_ERR(kbdev->devfreq)) {
 		kbase_devfreq_term_freq_table(kbdev);
 		return PTR_ERR(kbdev->devfreq);
