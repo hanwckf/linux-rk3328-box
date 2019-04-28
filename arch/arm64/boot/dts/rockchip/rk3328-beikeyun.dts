@@ -95,7 +95,7 @@
 		rockchip,pwm_id = <0>;
 		rockchip,pwm_voltage = <1250000>;
 		pwms = <&pwm0 0 5000 1>;
-		regulator-name = "vdd_arm";
+		regulator-name = "vcc_arm";
 		regulator-min-microvolt = <950000>;
 		regulator-max-microvolt = <1400000>;
 		regulator-settling-time-up-us = <250>;
@@ -113,6 +113,7 @@
 		regulator-min-microvolt = <900000>;
 		regulator-max-microvolt = <1300000>;
 		regulator-settling-time-up-us = <250>;
+		regulator-ramp-delay = <12500>;
 		regulator-always-on;
 		regulator-boot-on;
 	};
